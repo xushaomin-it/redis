@@ -1,7 +1,9 @@
 package com.xsm.redis;
 
 import cn.tanzhou.support.commons.redis.service.RedisService;
+import com.alibaba.fastjson.JSON;
 import com.xsm.redis.entity.Student;
+import com.xsm.redis.entity.User;
 import com.xsm.redis.service.StudentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ import java.util.Map;
 class RedisApplicationTests {
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private RedisService redisService;
@@ -26,7 +28,7 @@ class RedisApplicationTests {
 
     @Test
     public void contextLoads() {
-        HashOperations<String, Object, Object> h = redisTemplate.opsForHash();
+        HashOperations<String, Object, Object> h = stringRedisTemplate.opsForHash();
         HashMap<Object, Object> map = new HashMap<>();
         map.put("name", "xushaomin");
         map.put("age", "18");
@@ -46,6 +48,25 @@ class RedisApplicationTests {
         Student s2 = studentService.getById(1);
         Student s3 = studentService.getById(10);
         Student s4 = studentService.getById(10);
+    }
+
+    /**
+     * 测试发布订阅
+     * @see {com.xsm.redis.config.MyRedisConfig}
+     */
+    @Test
+    public void testTopic() {
+        String channel1 = "fullDataUpload";
+        String channel2 = "analysis";
+        User user = new User();
+        user.setPhone("18675830623");
+        user.setName("刘大");
+
+        User user2 = new User();
+        user2.setPhone("17856232365");
+        user2.setName("李二");
+        redisService.convertAndSend(channel1,JSON.toJSONString(user));
+        redisService.convertAndSend(channel2,JSON.toJSONString(user2));
     }
 
 }
